@@ -29,7 +29,7 @@ sudo nmap -sC -sV MACHINE_IP -oN nmap
     
  **`-sV`**: Probe open ports to determine service/version info.
 
-![MrRobot Nmap Scan](THM-writeups/MrRobot/resources/mr_robot_nmap.gif)
+![MrRobot Nmap Scan](resources/mr_robot_nmap.gif)
 
                           
 *No obviously useful results.*
@@ -78,11 +78,11 @@ I saved the output of this as a new wordlist called "new.dic" for later use.
 
 Visiting `http://MACHINE_IP/login` and tried using admin/admin as default credentials just to see what it does. 
 
-![WP Login Error](THM-writeups/MrRobot/resources/robot_wplogin_error_username.gif)
+![WP Login Error](resources/robot_wplogin_error_username.gif)
 This is interesting because it returns an overly specific error message "Invalid username." We can use this to our advantage to identify that we've correctly brute-forced the username, assuming it will then give us a different error message after receiving the expected username input. 
 
 Now we're going to Open Burp Suite and use Proxy to Intercept the same default credential request with admin/admin as our input. 
-![Burp Suite Proxy Intercept](THM-writeups/MrRobot/resources/robot_burp_proxy.gif)
+![Burp Suite Proxy Intercept](resources/robot_burp_proxy.gif)
 
 
 ### Brute Force Username
@@ -90,7 +90,7 @@ Now we're going to Open Burp Suite and use Proxy to Intercept the same default c
 
 Then we will send this capture to Intruder. Highlight the username "admin" and click Add payload. Click on the payloads tab up top and scroll down to "Payload settings. Click load to select your wordlist to use as a payload. We will be using our "new.dic" file to try and brute force a username. 
 
-![Burp Suite Intruder Window](THM-writeups/MrRobot/resources/robot_burp_intruder.gif)
+![Burp Suite Intruder winddow](resources/robot_burp_intruder.gif)
 
 Now just click **Start Attack**. Grab some coffee, this may take a while. Even though we've significantly shortened our wordlist from the original version, it's still pretty hefty. 
 
@@ -120,17 +120,17 @@ Well let's check to see how that reduced our wordlist line count.
 Well that's a couple thousand more lines filtered out. Not bad. I think that's probably about as small as we can reasonably make the wordlist by filtering things out. What's left is almost entirely legitimate words that could conceivably be used as a username. 
 
 Results:
-![Intruder Results](THM-writeups/MrRobot/resources/robot_burpsuite_intruder.gif)
+![Intruder Results](resources/robot_burpsuite_intruder.gif)
 Here you can see the difference in Response Length, which means "Elliot" is a likely choice for our username. 
 
 **OPTION 2** 
 I could try Hydra to see if that yields faster results. Spoiler...It does. 
 
-![Hydra Brute Force User](THM-writeups/MrRobot/resources/robot_hydra_username.gif)
+![Hydra Brute Force User](resources/robot_hydra_username.gif)
 
 Here I used the -L flag with our wordlist "new.dic" and the -p flag  with "null" as simply a place holder for the password input. The http-post-form input can be surmised from our original Burp Suite request in proxy.
 
-![Hydra input from Burp Suite Proxy request](THM-writeups/MrRobot/resources/robot_hydra_burp_info.gif)
+![Hydra input from Burp Suite Proxy request](resources/robot_hydra_burp_info.gif)
 
 The syntax for the http-post-form in Hydra requires three inputs separated by colons(`:`):
 
@@ -170,7 +170,7 @@ hydra -l Elliot -P new.dic MACHINE_IP http-post-form "/wp-login.php:log=^USER^&p
 
 I logged into Elliot's account and explored the WordPress dashboard where I identified two users:
 
-![WordPress dashboard](THM-writeups/MrRobot/resources/robot_wp_dash.gif)
+![WordPress dashboard](resources/robot_wp_dash.gif)
 
 I clicked on Krista's user profile and found a website link:
 http://mrrobot.wikia.com/wiki/Krista_Gordon
@@ -184,7 +184,7 @@ After clicking around the dashboard I noticed there is an "editor" option in the
 
 After selecting "editor," you’ll be presented with a template that includes comments and HTML code. On the right-hand sidebar, there is a list of available templates for editing. The presence of code in this initial template suggests that any changes made here will likely be executed when the corresponding page is accessed.  The first template in the list on the right-hand sidebar is the 404 template, which is typically displayed to users when they encounter a "Page Not Found" error on the website. Modifying this template could potentially allow for executing custom code when a 404 error page is triggered.
 
-![404 Template](THM-writeups/MrRobot/resources/robot_404.gif)
+![404 Template](resources/robot_404.gif)
 
 
 It's written in PHP, so let's replace it with a PHP reverse shell from https://www.revshells.com/
@@ -222,7 +222,7 @@ This file looks like a formatted string of `username : encrypted password`
 Let's decrypt it! I think https://hashes.com/en/decrypt/hash is a great resource for CTFs.
 
 
-![MD5 hash](THM-writeups/MrRobot/resources/robot_md5.gif)
+![MD5 hash](resources/robot_md5.gif)
 
 - **Decrypted MD5 hash**: `abcdefghijklmnopqrstuvwxyz`
 - **Switched to user robot**:
@@ -247,7 +247,7 @@ Here we find a variety of ways to use nmap to escalate our privileges.
 
 After realizing the SUID bit was set for nmap, I tried gtfo bins' escalation method. 
 
-![GTFO bins nmap/SUID](THM-writeups/MrRobot/resources/gtfo_nmap_suid.gif)
+![GTFO bins nmap/SUID](resources/gtfo_nmap_suid.gif)
 
 Unfortunately, this method didn't work for me. I could have tried a few more times to troubleshoot the issue, but feeling frustrated, I decided to do some further research. That's when I stumbled upon a particularly helpful blog: https://www.adamcouch.co.uk/linux-privilege-escalation-setuid-nmap/
 
@@ -292,8 +292,7 @@ When it comes to finding our credentials for the WordPress login form, there is 
 Let's start by visiting `http://MACHINE_IP/license`
 At first glance, it's just a quote from the show. Open up inspector. 
 
-![Base64 string](THM-writeups/MrRobot/resources/robot_base64.gif)
-
+![Base64 string](resources/robot_base64.gif)
 Notice that? 
 If you double-click into the "pre" field it reveals even more. It allows you to scroll down revealing more than is visible here. For ease of reading I've condensed it below:
 ```
