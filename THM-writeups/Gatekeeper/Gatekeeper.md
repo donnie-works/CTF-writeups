@@ -1,14 +1,3 @@
-
-
-
-2024-11-20 15:26
-
-Link: 
-
-Status:
-
-Tags:
-
 # Gatekeeper
 
 ## Enumeration
