@@ -128,7 +128,7 @@ Nmap done: 1 IP address (1 host up) scanned in 348.95 seconds
 
 List available shares available on port 445 with smblcient:
 
-![[smb access.png]]
+![smb_access.png](Gatekeeper_Resources/smb_access.png)
 
 Access "Users" with the following command:
 
@@ -139,7 +139,7 @@ smbclient \\\\Target_IP\\Users
 
 CD to "Share" and use mget to download "gatekeeper.exe"
 
-![[mget executable.png]]
+![mget_executable.png](Gatekeeper_Resources/mget_executable.png)
 
 ## Testing executable
 
@@ -153,7 +153,7 @@ I transferred the executable to my Flare VM using x32dbg for analysis.
 Go to ***options --> preferences --> events tab***
 Un-check all options:
 
-![[setup x32dbg.png]]
+![setup_x32dbg.png](Gatekeeper_Resources/setup_x32dbg.png)
 
 Press "ctrl + F2" to restart the executable with the new preferences.
 ## Manual Buffer Overflow Testing
@@ -246,13 +246,13 @@ for length in range(start_length, end_length + 1, step):
 **Expected Outcome**: Using this method, you’ll eventually find the exact buffer size where the program crashes and begins overwriting critical registers like the EIP. For example, you may find that the buffer crashes at **146 bytes (144 `A`s + 2 bytes `\r\n`)**, but the EIP isn’t overwritten until **150 bytes**.
 
 
-![[tedious manual testing.png]]
+![tedious_manual_testing.png](Gatekeeper_Resources/tedious_manual_testing.png)
 
 ***This part is tedious, so I'm going to skip ahead and give you the answer***
 
 After sending 150 bytes, the EIP is fully overwritten, as you will see below:
 
-![[EIP overwrite 41.png]]
+![EIP_overwrite_41.png](Gatekeeper_Resources/EIP_overwrite_41.png)
 
 ### **Step 3: Verifying the Offset:**
 
@@ -341,7 +341,7 @@ except Exception as e:
     - If the offset is correct, the **EIP** should display `42424242` (4 `B`s in hex).
 
 
-![[Overwritten EIP B.png]]
+![Overwritten_EIP_B.png](Gatekeeper_Resources/Overwritten_EIP_B.png)
 
 
 ---
@@ -420,7 +420,7 @@ Run your updated script and examine the **EIP** value in your debugger (e.g., x3
 
 This value corresponds to a specific position in the cyclic pattern. Right click EIP and copy the value.
 
-![[cyclic EIP test.png]]
+![cyclic_EIP_test.png](Gatekeeper_Resources/cyclic_EIP_test.png)
 
 To determine the exact offset where the overflow occurred, use the `msf-pattern_offset` tool:
 
@@ -518,7 +518,7 @@ except Exception as e:
 
 1. **Inspect the Stack**: After sending the payload, examine the memory at the address pointed to by the **ESP** register in your debugger (e.g., x32dbg, Immunity Debugger).
 
-![[follow badchars in dump.png]]
+![follow_badchars_in_dump.png](Gatekeeper_Resources/follow_badchars_in_dump.png)
     
 2. **Compare the Sequence**: Look at the memory dump starting from the **ESP** pointer. The bad characters should appear sequentially. If you see:
     
@@ -556,7 +556,7 @@ Here’s an example memory dump:
 - The first place you should notice a break in the pattern is after "09" - the next expected character is "0a" but the pattern is broken by "212121".
 - The next place you should notice a break in the pattern is again after "09" - the next expected character is "0a" but the pattern is broken by "00" and then continues on with the rest of the pattern. 
 
-![[break in bad characters.png]]
+![break_in_bad_characters.png](Gatekeeper_Resources/break_in_bad_characters.png)
 
 #### **3. Why did the pattern break after `\x09`?**
 
@@ -583,7 +583,7 @@ Replace your payload in test_badchars.py script and repeat the process until the
 
 The result should look like this:
 
-![[unbroken payload badchar test.png]]
+![unbroken_payload_badchar_test.png](Gatekeeper_Resources/unbroken_payload_badchar_test.png)
 
 ## Finding The JMP ESP
 
@@ -607,7 +607,7 @@ This section takes a slight detour to address an issue with address layouts. Whi
     - Accept the certificate prompt if prompted.
     - Select "home network" and close the pop-up.
     
-![[remmina setup.png]]
+![remmina_setup.png](Gatekeeper_Resources/remmina_setup.png)
 
 3. **Transfer the Executable**:
     
@@ -640,7 +640,7 @@ You can close the cmd prompt window.
     
     - Open **Immunity Debugger** and load `gatekeeper.exe`:
         - Click **File -> Open**, navigate to the admin's desktop, and select `gatekeeper.exe`.
-        ![[immunity debugger.png]]
+        ![immunity_debugger.png](Gatekeeper_Resources/immunity_debugger.png)
 1. **Start the Program**:
     
     - Press **F9** to start the program.
@@ -648,7 +648,7 @@ You can close the cmd prompt window.
     
     - Send your latest ***test_badchars.py*** payload to the THM Buffer Overflow Prep Box’s IP.
     - The program will crash, and Immunity Debugger will pause execution.
-    ![[Immunity badchars crash.png]]
+    ![Immunity_badchars_crash.png](Gatekeeper_Resources/Immunity_badchars_crash.png)
 
 ### **Step 3: Find the JMP ESP Address**
 
@@ -677,8 +677,8 @@ You can close the cmd prompt window.
         Big Endian:  080414C3  
         Little Endian: \xc3\x14\x04\x08
         ```
-        ![[jmp esp in immunity.png]]
-        ![[jmp address.png]]
+        ![jmp_esp_in_immunity.png](Gatekeeper_Resources/jmp_esp_in_immunity.png)
+        ![jmp_address.png](Gatekeeper_Resources/jmp_address.png)
 
 Now we're done with Immunity and this Windows 7 VM, so you can close remmina, and terminate the BOF Prep machine and restart the Gatekeeper machine.
 ### **Step 4: Update and Test the Exploit**
@@ -763,36 +763,36 @@ nc -lvnp 4445
 python3 exploit.py
 ```
 
-![[send exploit.png]]
+![send_exploit.png](Gatekeeper_Resources/send_exploit.png)
 
 You should receive a connection back. The user flag is easy pickings from here.
 
-![[initial connection and user flag.png]]
+![initial_connection_and_user_flag.png](Gatekeeper_Resources/initial_connection_and_user_flag.png)
 
 ## Privilege Escalation
 ### **Enumeration**
 
 Now our goal is to get the root user's flag. My immediate thought is to find out what other users exist. 
 
-![[other users.png]]
+![other_users.png](Gatekeeper_Resources/other_users.png)
 
 Can't be that easy. At least now we know who's flag we're trying to get. The mayor!
 ### **Orientation to Environment**
 
 If you aren't sure what commands are available to you in this environment, you can usually type "help" to get a list. 
 
-![[help options.png]]
+![help_options.png](Gatekeeper_Resources/help_options.png)
 
 This is not the complete list for this room, but just a screenshot to show you - it's always helpful to know what resources are immediately available to you when you gain a foothold. 
 
 Another quick orientation tip for windows environments: run `systeminfo`
 
-![[systeminfo.png]]
+![systeminfo.png](Gatekeeper_Resources/systeminfo.png)
 
 Moving on, I noticed another interesting file on our current user's desktop. ***Firefox.lnk***
 Let's grab that by adding it to the existing smb share. 
 
-![[copy firefox.lnk to share.png]]
+![copy_firefox.lnk_to_share.png](Gatekeeper_Resources/copy_firefox.lnk_to_share.png)
 
 Now we can log in to the share using the following command as before:
 ```
@@ -800,15 +800,15 @@ smbclient \\\\10.10.222.129\\Users
 ```
  Then download the ***Firefox.lnk*** file to our kali machine.
 
-![[mget link.png]]
+![mget_link.png](Gatekeeper_Resources/mget_link.png)
 
 Once we have this let's continue investigating.
 If you try to click the link we downloaded, it won't do anything useful. 
 So let's take a deeper look at it using the `more` and `file` commands:
 
-![[more link.png]]
+![more_link.png](Gatekeeper_Resources/more_link.png)
 
-![[file link.png]]
+![file_link.png](Gatekeeper_Resources/file_link.png)
 
 From these screenshots we can see a few things:
 1. A file path to investigate `AppData\Local\Mozilla\Firefox`
@@ -816,19 +816,19 @@ From these screenshots we can see a few things:
 
 Back in our user's profile we can run the `dir /a` command to see if we can find the 'AppData' directory.
 
-![[dir all.png]]
+![dir_all.png](Gatekeeper_Resources/dir_all.png)
 
 Now let's see if we can follow this rabbit hole to something useful.
 
-![[found firefox profiles.png]]
+![found_firefox_profiles.png](Gatekeeper_Resources/found_firefox_profiles.png)
 
 I found some profiles. Let's keep digging...
 
-![[nothin here.png]]
+![nothin_here.png](Gatekeeper_Resources/nothin_here.png)
 
 Well, nothing here. Let's try the other profile...
 
-![[nothing here either.png]]
+![nothing_here_either.png](Gatekeeper_Resources/nothing_here_either.png)
 
 ### **Re-Orientation to Objective**
 
@@ -837,38 +837,38 @@ I read a bunch of walkthroughs and everyone was using a Metasploit module called
 
 So let's take a look at this script:
 
-![[ruby script location.png]]
+![ruby_script_location.png](Gatekeeper_Resources/ruby_script_location.png)
 
 Here's where it's looking and what it's looking for:
 
-![[metasploit firefox script.png]]
+![metasploit_firefox_script.png](Gatekeeper_Resources/metasploit_firefox_script.png)
 ### **Gathering Essential Files**
 
 So that's where we're going and what we're going to get. It looks like we were looking in the wrong directory previously. We should have been looking in "Roaming" directory instead of "Local". 
 
-![[Files needed for creds.png]]
+![Files_needed_for_creds.png](Gatekeeper_Resources/Files_needed_for_creds.png)
 
 Just copy the files to the existing share:
 
-![[copy to share.png]]
+![copy_to_share.png](Gatekeeper_Resources/copy_to_share.png)
 
 Log back in to the SMB share and download the files:
 
-![[smb creds download.png]]
+![smb_creds_download.png](Gatekeeper_Resources/smb_creds_download.png)
 
 ### **Exploitation**
 
 Download the python script ***firefox_decrypt.py*** to get Mayor's credentials.
 
-![[firefox_decrypt.png]]
+![firefox_decrypt.png](Gatekeeper_Resources/firefox_decrypt.png)
 
 Login with ***smbexec***
 
-![[cant cd in smbexec.png]]
+![cant_cd_in_smbexec.png](Gatekeeper_Resources/cant_cd_in_smbexec.png)
 
 Navigate to Mayor's desktop and read the root flag.
 
-![[type root flag.png]]
+![type_root_flag.png](Gatekeeper_Resources/type_root_flag.png)
 
 Complete!
 # References

