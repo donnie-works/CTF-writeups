@@ -125,9 +125,11 @@ The binary still contains debugging symbols and extra metadata (e.g., function n
 ## Testing the Waters: First Look
 
 Running the program to see what it does:
+
 ![program_request_input.png](DearQA_Resources/program_request_input.png)
 
 Giving it my name as user input:
+
 ![program_received_input.png](DearQA_Resources/program_received_input.png)
 
 Seems pretty simple -this program takes user input and returns it in a formatted string that says:
