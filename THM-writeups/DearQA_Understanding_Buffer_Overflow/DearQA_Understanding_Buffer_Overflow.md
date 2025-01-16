@@ -18,23 +18,23 @@ Task files for this tutorial can be downloaded at: https://tryhackme.com/r/room/
 
 To simplify the idea of a program's execution flow, think about a marble run track. 
 
-![](marble_run_1.png)
+![marble_run_1.png](marble_run_1.png)
 
 The more intricate ones can do some pretty cool things with "switch and response" or "chain reaction" type engineering. Possibly changing the path a marble takes based on weight, speed, state of the track's features based whether other marbles have already gone down the track. Some even have elevators that can re-orient a marble's position on it's journey to the end. 
 
-![](marble_run_2.png)
+![marble_run_2.png](marble_run_2.png)
 
 Ultimately though, the marble's journey reaches some sort of destination. 
 
 A simpler way to understand execution flow is to think of it like a river. It starts at a source and flows steadily in one main direction. Along the way, it might branch into smaller streams or take diversions, either naturally or through human intervention, before continuing toward its destination—unless, of course, it’s intentionally redirected for another purpose. Think of examples like the Chicago River reversal in 1900, the Yellow River diversions in China, or the Roman siphon aqueducts, where the flow was deliberately altered to achieve a specific goal.
 
-![](river_image.png)
+![river_image.png](river_image.png)
 
 I'll stop "damming the flow" of this tutorial with the analogies soon.
 
 Program execution flow as a "watershed" model.
 
-![](simplified_execution_flow.png)
+![simplified_execution_flow.png](simplified_execution_flow.png)
 
 Above is just meant to be a simple illustration of how a program's "flow" of execution can be conceptualized as a river running it's course. Okay, on to deeper waters. 
 
@@ -51,9 +51,9 @@ The CPU and main memory work much like the human brain:
 
 Just as the brain relies on clear pathways to think and act efficiently, the CPU, memory, and system buses must work in harmony. Overloading any part can cause weird things to happen.
 
-![](tim_and_eric.png)
+![tim_and_eric.png](tim_and_eric.png)
 
-![](cpu_ram.png)
+![cpu_ram.png](cpu_ram.png)
 
 ### What Registers We'll Be Emphasizing
 
@@ -65,7 +65,7 @@ Just as the brain relies on clear pathways to think and act efficiently, the CPU
 
 Stack Structure Simplified:
 
-![](stack_address_structure.png)
+![stack_address_structure.png](stack_address_structure.png)
 
 
 ### What is a "*buffer*"?
@@ -77,7 +77,7 @@ In the context of a function being called inside a program:
 
 How a function's "buffer" is allocated on the stack:
 
-![buffer_allocation_visual.png|700](buffer_allocation_visual.png)
+![buffer_allocation_visual.png](buffer_allocation_visual.png)
 
 ---
 ## Case Study: The TryHackMe Room "DearQA"
@@ -124,10 +124,10 @@ The binary still contains debugging symbols and extra metadata (e.g., function n
 ## Testing the Waters: First Look
 
 Running the program to see what it does:
-![](program_request_input.png)
+![program_request_input.png](program_request_input.png)
 
 Giving it my name as user input:
-![](program_received_input.png)
+![program_received_input.png](program_received_input.png)
 
 Seems pretty simple -this program takes user input and returns it in a formatted string that says:
 *"Hello: <user_name>"*
@@ -140,14 +140,14 @@ The `strings` command is a tool in Linux (and similar operating systems) that he
 
 Running `strings` to see if there's any "leaks of useful info" like function names, system calls, etc...
 
-![](strings_dearqa.png)
+![strings_dearqa.png](strings_dearqa.png)
 
 We'll come back to some of these later.
 For now, I want to note that `main` is a common function name and `vuln` seems like an obvious clue from the author of this challenge - maybe a another function that is vulnerable? 
 
 `nm` is a common Linux utility, often used as a debugging tool - it displays information about symbols within a given object file, executable, or library.
 
-![](nm_dearqa.png)
+![nm_dearqa.png](nm_dearqa.png)
 
 ### Useful Addresses
 
@@ -155,7 +155,7 @@ For now, I want to note that `main` is a common function name and `vuln` seems l
 
 Dumping the addresses for the functions we found with `strings` in case we need them later:
 
-![](objdump_addresses.png)
+![objdump_addresses.png](objdump_addresses.png)
 
 `main` is located at memory address `0x00000000004006c3` (a 64-bit address), which we'll shorten to `0x4006c3` to make things a little easier. 
 
@@ -180,7 +180,7 @@ Below we disassemble the `.text` section of our program (targeting where our fun
 
 `.text` *section disassembled* with `objdump`:
 
-![](objdump_disassembly.png)
+![objdump_disassembly.png](objdump_disassembly.png)
 
 This screen shot only captures `vuln` and `main` to save space, but the command will return more info. 
 
@@ -193,16 +193,16 @@ Pseudo code in Ghidra is a simplified, high-level representation of a program's 
 
 ---Break for memes---
 
-![](ghidra_meme.png)
+![ghidra_meme.png](ghidra_meme.png)
 
-![](adhd_meme.png)
+![adhd_meme.png](adhd_meme.png)
 
-![](kid_meme.png)
+![kid_meme.png](kid_meme.png)
 
 ---Back to work---
 #### Ghidra's Pseudo C Code of `main` Function:
 
-![](ghidra_main.png)
+![ghidra_main.png](ghidra_main.png)
 
 #### Breakdown of `main()`
 `char local_28[32]` is a "ghidra-ism" representing a declaration of a local variable on the stack. 
@@ -220,7 +220,7 @@ So our simple program is vulnerable to buffer overflow due to a lack of boundary
 
 #### Ghidra's Pseudo C Code of `vuln` Function:
 
-![](ghidra_vuln.png)
+![ghidra_vuln.png](ghidra_vuln.png)
 
 #### Breakdown of `vuln()`
 We can see that `vuln` executes the system call `execve` to open a shell (`"/bin/bash"`).
@@ -246,14 +246,14 @@ How? - Through the `scanf` overflow vulnerability that we identified.
 
 Once installed just run your program with the `gdb` command. 
 
-![](open_pwndbg.png)
+![open_pwndbg.png](open_pwndbg.png)
 
 A "breakpoint" is essentially an address or instruction in the program where we want to pause execution to see what's happening at that point in flow of execution. 
 
 Set a breakpoint at main and run the program: 
 	`break main` - or - `break *0x00000000004006c3` - or - `b *0x4006c3`
 
-![](break_main_pwndbg.png)
+![break_main_pwndbg.png](break_main_pwndbg.png)
 
 Here the `rip` is pointing to the next instruction, `push rbp` - this will mark the base of our function's stack frame. More on what that means later. 
 
@@ -286,13 +286,13 @@ Use `step` command to show the state of the program at the next instruction.
 
 **Step 2**:
 
-![](step_2_pwndbg.png)
+![step_2_pwndbg.png](step_2_pwndbg.png)
 
 Here, `rip` is pointing to the instruction `mov rbp,rsp`, which sets the base pointer (`rbp`) to the same location as the stack pointer (`rsp`). This aligns them so the base pointer can help organize and manage the current stack frame.
 
 **Step 3**:
 
-![](step_3_pwndbg.png)
+![step_3_pwndbg.png](step_3_pwndbg.png)
 
 Here `rip` is pointing to `sub  rsp,0x20` - this will allocate 32 bytes of space on our stack frame.
 
@@ -304,7 +304,7 @@ $$
 
 `pwndbg` disassembly of main function using `disassemble main` at step 3:
 
-![|525](main_preoverflow.png)
+![main_preoverflow.png](main_preoverflow.png)
 
 Highlighted lines above are where `rip` points to "step 3" - the next instruction at <main+4>
 	i.e. the `rbp` and `rsp` are collocated on in the stack frame - buffer not yet allocated
@@ -312,7 +312,7 @@ Highlighted lines above are where `rip` points to "step 3" - the next instructio
  
 
 ***making some space on the stack***
-![](buffer_allocation_visual.png)
+![buffer_allocation_visual.png](buffer_allocation_visual.png)
 
 This is a simplified representation of what's happening when steps 1-3 are executed in our function.
 
@@ -323,7 +323,7 @@ Using `info registers` is another way we can see state of the registers at vario
 Below is what the registers look like with `rip` pointing to "step 3" - the next instruction at <main+4> 
 	i.e. after `push  rbp` and `mov  rbp,rsp`, but prior to executing `sub  rsp,0x20` (buffer allocation):
 
-![](registers_pre_allocation_buffer.png)
+![registers_pre_allocation_buffer.png](registers_pre_allocation_buffer.png)
 
 Notice that `rbp` and `rsp` are collocated at the same address (ending in ***dc10***) 
 	- accomplished by executing "step 2" (*<main+1>*) of `main` function (`mov  rbp,rsp`)
@@ -333,7 +333,7 @@ Here's what happens when `rip` points to "step 4".
 This is `info registers` after executing "step 3" `sub rsp,0x20` (allocating buffer) - prior to the user providing input.
 	`b *main+8` or `b 0x4006cb`
 
-![](registers_pre_user_input.png)
+![registers_pre_user_input.png](registers_pre_user_input.png)
 
 Notice that `rsp` is now offset by **32 bytes**.
 		**Hex math**:
@@ -357,16 +357,16 @@ Here’s where it can get a bit tricky, and I hope this explanation saves you so
 
 When people say `rsp` points to the "top" of the stack, they don’t mean the highest address in memory. Instead, it means the **most current** location on the stack, where the last item was pushed. Since `rsp` updates constantly as items are added or removed, the "top" of the stack is always changing. If the function runs normally and reaches the `ret` instruction, `rsp` should be pointing to the return address, so the program knows where to go next.
 
-![](LIFO_principle.png)
+![LIFO_principle.png](LIFO_principle.png)
 
 
 So, the stack grows downward (from high to low addresses), which we typically visualize as being low to high - and the base (`rbp`) is at the highest address, and the top (`rsp`) is sometimes at the bottom. Utter Nonsense...
 
-![](spiderman_meme.png)
+![spiderman_meme.png](spiderman_meme.png)
 
-![](parks_rec_meme.png)
+![parks_rec_meme.png](parks_rec_meme.png)
 
-![](office_meme.png)
+![office_meme.png](office_meme.png)
 
 Moving on...
 
@@ -379,18 +379,18 @@ Moving on...
 	    **higher** --> **lower** addresses (i.e. `0x102` --> `0x70` = 32 bytes)
 	    
 	Stack frame prior to user input:
-		![](stack_frame_pre_overflow.png)
+		![stack_frame_pre_overflow.png](stack_frame_pre_overflow.png)
 	    
 2. **Writing User Input to the Buffer**:
     
      When user input is written into the buffer (as with `scanf`), it is written *upward*:
 	    **lower** --> **higher** addresses (i.e. `0x70` --> `0x102`)
-		![](stack_address_structure.png)
+		![stack_address_structure.png](stack_address_structure.png)
 	
 3. **Overflow Behavior**:
 	    If the user's input exceeds the allocated space (i.e. **32 bytes** as in our example), and there's no security in place to stop it, it will overflow into the memory space immediately following the buffer's boundary, which is the `rbp`.
 		    For example, if the user provides **33 bytes** of input, the first **32 bytes** will fill the **buffer** and the **33rd byte** will overwrite the **first byte** of the saved `rbp` address on the stack.
-	    ![](byte_33.png)
+	    ![byte_33.png](byte_33.png)
 
 
 #### ***Cup Analogy***:
@@ -401,10 +401,10 @@ Moving on...
     
 - **Overflow = Spilling Cup**: If you pour too much data (more than 32 bytes), the excess spills beyond the cup (buffer) and starts  spilling onto (overwriting) the floor (the `rbp`) and potentially other structures beyond the `rbp`.
     
-	![](cup_analogy.jpg)
+	![cup_analogy.jpg](cup_analogy.jpg)
 	Stack frame post over flow input:
 
-![](stack_frame_overflowed.png)
+![stack_frame_overflowed.png](stack_frame_overflowed.png)
 
 Now, you might be thinking: "okay, we overwrote the base pointer, but the return address is still intact, so wouldn’t the program just exit the function and return as expected?"
 
@@ -412,7 +412,7 @@ Good question, but the answer is no. The `ret` instruction fails because `rsp` (
 
 Normally the `rsp` is incrementally updated as the stack grows and shrinks during execution, and by the time the function reaches the `ret` instruction, `rsp` should point to the return address.
 
-![](raccoon_meme.png)
+![raccoon_meme.png](raccoon_meme.png)
 #### More On The Stack Frame
 
 A **stack frame** in this context refers to the section of the stack used to store data for a single function call - it typically includes:
@@ -440,7 +440,7 @@ In this specific program:
 
 Current stack frame layout after executing step 3 (`rip` pointing to step 4): 
 
-![](stack_frame_step_3.png)
+![stack_frame_step_3.png](stack_frame_step_3.png)
 
 Here you can see some things we've talked about:
 	`rsp` - points to ***dbf0*** (beginning of buffer - last thing we added)
@@ -450,7 +450,7 @@ Here you can see some things we've talked about:
 
 Stack frame contents viewed '1 byte' at a time with `pwndbg`:
 
-![](stack_1_byte.png)
+![stack_1_byte.png](stack_1_byte.png)
 		`x`: examine memory contents starting at specified address
 		`72`: number of entries to display
 		`b`: view memory in **bytes** (1 byte per entry)
@@ -461,11 +461,11 @@ Stack frame contents viewed '1 byte' at a time with `pwndbg`:
 Let's try running the program with a breakpoint set at the point where we provide user input:
 	`break *main+80` or `b * 0x400713`
 
-![](breakpoint_userinput.png)
+![breakpoint_userinput.png](breakpoint_userinput.png)
 
 Now let's look at the registers byte by byte:
 
-![](username_in_stack.png)
+![username_in_stack.png](username_in_stack.png)
 
 That's my handle (in hex) stored in the buffer!
 
@@ -482,11 +482,11 @@ Filling the buffer with junk (fuzzing) to confirm it is vulnerable:
 
 ***Example with input ('A' * 32 + 'B' * 18)***  --> This should fill the buffer with "A" -  then start overwriting anything beyond that (i.e. the `rbp`) with "B"
 
-![](fuzzing_A_B.png)
+![fuzzing_A_B.png](fuzzing_A_B.png)
 
 Here's a closer look at the registers to confirm it worked:
 
-![](fuzzed_registers.png)
+![fuzzed_registers.png](fuzzed_registers.png)
 
 Notice the buffer started at address ending in ***dbf0*** is filled with the "0x41" 
 	 "0x41" = hexadecimal representation of "A"
@@ -503,7 +503,7 @@ Remember the `vuln` function? It was at address  `0x400686`
 
 So let's set a breakpoint just prior to executing the `ret` instruction for `main` before we journey to `vuln` so we can verify that our address is being entered into the stack:
 
-![](breakpoint_prior_to_vuln.png)
+![breakpoint_prior_to_vuln.png](breakpoint_prior_to_vuln.png)
 
 Now we're going to run our program with the following command that has our junk data and our destination (`vuln` at address `0x400686`):
 
@@ -527,15 +527,15 @@ First let's break that down:
 
 Now let's run it:
 
-![](vuln_addr_input.png)
+![vuln_addr_input.png](vuln_addr_input.png)
 
 You can see here that our `rip` is pointing to the `ret` instruction. This instruction takes the value at the top of the stack (or where `rsp` is currently pointing --> `0x400686` in this example) and places it into the `rip` register. This tells the CPU to jump to that address and execute the instructions found there—in this case, the `vuln` function.
 
 Take a closer look at the stack:
 
-![](stack_addr_vuln_input.png)
+![stack_addr_vuln_input.png](stack_addr_vuln_input.png)
 
-![](morty_meme.png)
+![morty_meme.png](morty_meme.png)
 ### **Recap:** 
 Our `main` function has reached the end of its lifecycle (`ret`). Normally, the stack contains the following just before `ret`:
 
@@ -555,13 +555,13 @@ When `ret` is executed:
 
 So in theory, once we fully execute this input, allowing the program to run without breakpoints, the program should redirect the flow of execution to a function that was not originally supposed to be executed at all. 
 
-![](wkuk_meme.png)
+![wkuk_meme.png](wkuk_meme.png)
 
 ### **Scripting our exploit**
 
 So now what we want to do is write a script that will accomplish the same thing against a server running this vulnerable program. But first we'll craft it for local execution just to make sure it works as expected. Then we'll execute it remotely against the THM machine. 
 
-![](oh_boy_meme.png)
+![oh_boy_meme.png](oh_boy_meme.png)
 
 #### Local Exploit Script:
 
@@ -600,7 +600,7 @@ p.interactive()
  
 Seems to work - got a command prompt (`$`):
 
-![](local_execution.png)
+![local_execution.png](local_execution.png)
 
 Now let's test it on the real thing.
 
@@ -610,11 +610,11 @@ Connect to THM network via your openvpn config file: (`sudo openvpn You_User_Nam
 Then navigate to https://tryhackme.com/r/room/dearqa - you should have already downloaded the binary from here.
 Start the machine.
 
-![](THM_start.png)
+![THM_start.png](THM_start.png)
 
 This will take approximately 60 seconds to load and give you the IP to the vulnerable machine on the THM network. 
 
-![](THM_IP.png)
+![THM_IP.png](THM_IP.png)
 
 Now we have the IP and the port the service is running on, so let's craft our remote exploit script.
 #### Remote Exploit Script:
@@ -648,13 +648,13 @@ Directing our script to target a the binary running on a remote server instead o
 
 Let's send it. 
 
-![](flag_txt.png)
+![flag_txt.png](flag_txt.png)
 
 
 Easy day. There's the flag. Hope that was helpful!
 Now go be geniuses and make things do stuff....legally obviously. 
 
-![](michael_dont_meme.png)
+![michael_dont_meme.png](michael_dont_meme.png)
 ## Epilogue: Leave...Go on now...Ret!
 
 Below you'll find some resources (in no particular order) that I think are very useful if you're interested in learning more about what we've covered here. Also I've listed some topics think about investigating further which would be helpful:
@@ -664,7 +664,7 @@ Below you'll find some resources (in no particular order) that I think are very 
 	4. Computer Architecture
 	5. Return Oriented Programming
 
-![](kenny_powers.png)
+![kenny_powers.png](kenny_powers.png)
 # Resources
 
 ## Cheat sheets:
