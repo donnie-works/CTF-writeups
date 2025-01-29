@@ -1,10 +1,4 @@
-2024-12-26 17:43
 
-Link: [Buffer Overflow](Buffer%20Overflow.md)
-
-Status: **Need to fix formatting for list sections**
-
-Tags: #BOF #THM #OSCP 
 # Understanding Buffer Overflow: A Case Study with the  TryHackMe Room'DearQA'
 
 ## Welcome
