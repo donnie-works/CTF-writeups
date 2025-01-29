@@ -386,25 +386,35 @@ Moving on...
 
 **Note**: here I've used simplified pseudo-addresses for the sake of explanation only 
 		(i.e. `0x102` = **higher** address and `0x70` = **lower** address)
-		
+
+
 1. **Buffer Allocation**:
     
      When space is allocated on the stack for local variables (like `local_28`), it is allocated *downward*: 
 	**higher** --> **lower** addresses (i.e. `0x102` --> `0x70` = **32 bytes**)
 
 	Stack frame prior to user input:
-		![stack_frame_pre_overflow.png](DearQA_Resources/stack_frame_pre_overflow.png)
-	    
+
+	![stack_frame_pre_overflow.png](DearQA_Resources/stack_frame_pre_overflow.png)
+
+
 2. **Writing User Input to the Buffer**:
     
      When user input is written into the buffer (as with `scanf`), it is written *upward*:
 	    **lower** --> **higher** addresses (i.e. `0x70` --> `0x102`)
-		![stack_address_structure.png](DearQA_Resources/stack_address_structure.png)
-	
+
+
+
+	![stack_address_structure.png](DearQA_Resources/stack_address_structure.png)
+
+
 3. **Overflow Behavior**:
 	    If the user's input exceeds the allocated space (i.e. **32 bytes** as in our example), and there's no security in place to validate the length of the input , it will overflow into the memory space immediately following the buffer's intended boundary, which is the `rbp`.
 		    For example, if the user provides **33 bytes** of input, the first **32 bytes** will fill the **buffer** and the **33rd byte** will overwrite the **first byte** of the saved `rbp` address on the stack.
-	    ![byte_33.png](DearQA_Resources/byte_33.png)
+
+
+
+	![byte_33.png](DearQA_Resources/byte_33.png)
 
 
 #### ***Cup Analogy***:
@@ -414,15 +424,19 @@ Moving on...
 - **Buffer as the Cup**: The buffer is like a "cup" allocated below the `rbp`, designed to hold a specific amount of user data (32 bytes in this case).
     
 - **Overflow = Spilling Cup**: If you pour too much data (more than 32 bytes), the excess spills beyond the cup (buffer) and starts  spilling onto (overwriting) the floor (the `rbp`) and potentially other structures beyond the `rbp`.
-    
-	![cup_analogy.jpg](DearQA_Resources/cup_analogy.jpg)
-	Stack frame post over flow input:
+
+![cup_analogy.jpg](DearQA_Resources/cup_analogy.jpg)
+
+
+Stack frame post over flow input:
 
 ![stack_frame_overflowed.png](DearQA_Resources/stack_frame_overflowed.png)
 
 Now, you might be thinking: "okay, we overwrote the base pointer, but the return address is still intact, so wouldn’t the program just exit the function and return as expected?"
 
 Good question, but the answer is no. The `ret` instruction falters because `rsp` (the stack pointer) has been corrupted and now points to an invalid memory location. This is like irrecoverable spatial disorientation for the program. 
+
+### **"Helo-Chopters"**
 
 ***Analogy, yay!***
 Imagine a pilot flying at night, over glassy water that reflects the stars and the clouds like a mirror. In these situations, due to a lack of orienting visual references, pilots rely on instruments to guide them in maintaining safe flight profiles. Suddenly their instruments malfunction and they have to rely completely on what they can see. 
