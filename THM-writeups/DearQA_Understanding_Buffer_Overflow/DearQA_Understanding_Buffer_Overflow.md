@@ -1,5 +1,5 @@
 
-# Understanding Buffer Overflow: A Case Study with the  TryHackMe Room'DearQA'
+# The "0x41\0x42\0x43's" of Binary Exploitation: A Case Study with the  TryHackMe Room'DearQA'
 
 ## Welcome
 
