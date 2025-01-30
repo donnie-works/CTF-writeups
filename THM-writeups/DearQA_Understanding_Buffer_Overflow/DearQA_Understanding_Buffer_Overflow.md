@@ -88,7 +88,7 @@ What is an ELF?
 
 Looking at program specs with `file`:
 
-![file_info.png](DearQA_Resources/6.%20Notes/CTFs/THM/DearQA_Understanding_Buffer_Overflow/DearQA_Resources/file_info.png)
+![file_info.png](DearQA_Resources/file_info.png)
 
 
 - **64-bit architecture** - binary is compiled for a 64-bit processor architecture, such as x86-64.
@@ -685,12 +685,13 @@ Now go be geniuses and make things do stuff....legally obviously.
 ![michael_dont_meme.png](DearQA_Resources/michael_dont_meme.png)
 ## Epilogue: Leave...Go on now...Ret!
 
-Below you'll find some resources (in no particular order) that I think are very useful if you're interested in learning more about what we've covered here. Also I've listed some topics think about investigating further which would be helpful:
-	1. Assembly language
-	2. 'C' language
-	3. Python
-	4. Computer Architecture
-	5. Return Oriented Programming
+Below you'll find some resources (in no particular order) that I think are very useful if you're interested in learning more about what we've covered here. I've also listed some additional topics that I think are helpful to have some familiarity with:
+
+1. Assembly language
+2. 'C' language
+3. Python
+4. Computer Architecture
+5. Return Oriented Programming
 
 ![kenny_powers.png](DearQA_Resources/kenny_powers.png)
 # Resources
